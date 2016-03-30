@@ -6,9 +6,10 @@
 source('pdbauth.R')
 
 library(httr)
-library(RSQLite)
 
 # Fitbit authentication
+epapp <- oauth_app('EPApp', key, secret)
+
 token_url <- 'https://api.fitbit.com/oauth/request_token'
 access_url <- 'https://api.fitbit.com/oauth/access_token'
 auth_url <- 'https://www.fitbit.com/oauth/authorize'
@@ -16,9 +17,6 @@ fitbit <- oauth_endpoint(token_url, auth_url, access_url)
 
 fbtoken <- oauth1.0_token(fitbit, epapp)
 sig <- config(token=fbtoken)
-
-pdbf <- '../../OneDrive/References/Data/p.db'
-pdbc <- dbConnect(SQLite(), dbname=pdbf)
 
 # Fetch recent days' data
 steps <- NULL
