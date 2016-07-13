@@ -3,11 +3,9 @@
 #
 source('pdbauth.R')
 
-library(xlsx)
-
+library(readxl)
 pdbxl <- paste(pdbdir, "pdb.xlsx", sep="/")
-
-inxl <- read.xlsx(pdbxl, sheetName="out", stringsAsFactors=F)
+inxl <- read_excel(pdbxl)
 inxl$dtstart <- as.character(inxl$dtstart)
 inxl$dtend <- as.character(inxl$dtend)
 
@@ -15,7 +13,7 @@ inxl$dtend <- as.character(inxl$dtend)
 #inxl[is.na(inxl$id), "id"] <- paste0(idpfx, sprintf("%04d", seq(1:sum(is.na(inxl["id"])))))
 
 #newrecs <- inxl[substr(inxl$id, 1, nchar(idpfx))==idpfx, ]
-dbWriteTable(pdbc, 'temptable', inxl, overwrite=T, row.names=F)
+dbWriteTable(pdbc, 'temptable', as.data.frame(inxl), overwrite=T, row.names=F)
 dbGetQuery(conn=pdbc, "INSERT OR REPLACE INTO obs SELECT * FROM temptable")
 dbDisconnect(pdbc)
 

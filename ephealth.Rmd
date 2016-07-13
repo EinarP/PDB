@@ -2,16 +2,13 @@ EPhealth
 ========================================================
 Assumption: lifestyle affects health
 ```{r dbcon, echo=FALSE, cache=F}
+
 enLocale <- Sys.setlocale("LC_TIME", "English")
 
 goalCol <- "red"
 trendCol <- "blue"
 
-#TODO: data connections through a generic function
-pdbDir <- '../../OneDrive/References/Data'
-
-library(RSQLite, quietly=T)
-pdbc <- dbConnect(SQLite(), dbname=paste(pdbDir, "p.db", sep="/"))
+source('pdbauth.R')
 obs <- dbGetQuery(conn=pdbc, "select * from obs")
 
 obsnum <- obs[obs$elem != "socact", ]
@@ -32,7 +29,7 @@ obsw <- merge(obsw, obslchar, by.x = "date", by.y = "date", all = TRUE)
 ## Daily measurements
 
 ```{r fig.width=12, echo=F, fig.height=7}
-tail(obsw[, c("date", "weight", "fat", "steps")], 8)
+print(tail(obsw[, c("date", "weight", "fat", "steps")], 8), row.names=FALSE)
 
 #Weight
 plot(obsw$date, obsw$weight, type="l", main="Weight", ylim=c(64, 86))
@@ -67,7 +64,7 @@ TODO! RHR
 
 ```{r tp, fig.width=12, fig.height=5, echo=F}
 act <- obsw[!(is.na(obsw$steps) & is.na(obsw$trnaer) & is.na(obsw$trnana)), ]
-act <- act[ ,c("date", "steps", "trnaer", "trnana", "socact")]
+act <- act[ ,c("date","steps","trnaer","trnana","socact","homework")]
 act$yearweek <- paste0(format(act$date, "%Y"), "-", strftime(as.POSIXlt(act$date), format="%W"))
 
 stepsmean <- aggregate(steps ~ yearweek, data=act, mean)
@@ -76,12 +73,13 @@ stepsmean$steps <- ifelse(stepsmean$steps < 10000, 0, 1 + round((stepsmean$steps
 trnana <- aggregate(trnana ~ yearweek, data=act, length)
 trnaer <- aggregate(trnaer ~ yearweek, data=act, length)
 socact <- aggregate(socact ~ yearweek, data=act, length)
-actsum <- Reduce(function(x, y) merge(x, y, all=TRUE), list(stepsmean, trnana, trnaer, socact))
+homework <- aggregate(homework ~ yearweek, data=act, length)
+actsum <- Reduce(function(x, y) merge(x, y, all=TRUE), list(stepsmean, trnana, trnaer, socact, homework))
 
-tail(actsum, 8)
+tail(actsum, 8, row.names=FALSE, row.names=FALSE)
 
 actsum[is.na(actsum)] <- 0
-barplot(t(as.matrix(actsum[,2:5])), names.arg=actsum[,1], col=c("darkgreen", "darkred", "darkblue", "yellow"), ylim=c(0, 10), legend.text=T, args.legend=list(ncol=4, x="topleft"))
+barplot(t(as.matrix(actsum[,2:6])), names.arg=actsum[,1], col=c("darkgreen", "darkred", "darkblue", "yellow","white"), ylim=c(0, 10), legend.text=T, args.legend=list(ncol=4, x="topleft"))
 box()
 abline(h=3, lty=3)
 abline(h=6, lty=3)
