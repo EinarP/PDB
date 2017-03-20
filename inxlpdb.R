@@ -1,7 +1,7 @@
 #
 # Populate p.db from PDB.xlsx
 #
-source('pdbauth.R')
+source('../private/pdbauth.R')
 
 library(readxl)
 pdbxl <- paste(pdbdir, "pdb.xlsx", sep="/")

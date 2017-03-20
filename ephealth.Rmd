@@ -8,7 +8,7 @@ enLocale <- Sys.setlocale("LC_TIME", "English")
 goalCol <- "red"
 trendCol <- "blue"
 
-source('pdbauth.R')
+source('../private/pdbauth.R')
 obs <- dbGetQuery(conn=pdbc, "select * from obs")
 
 obsnum <- obs[obs$elem != "socact", ]
@@ -34,7 +34,7 @@ print(tail(obsw[, c("date", "weight", "fat", "steps")], 8), row.names=FALSE)
 #Weight
 plot(obsw$date, obsw$weight, type="l", main="Weight", ylim=c(64, 86))
 segments(as.Date("2003-11-01"), 70, max(obsw$date), 70, col=goalCol)
-segments(as.Date("2008-09-01"), 65, max(obsw$date), 65, col=goalCol)
+segments(as.Date("2008-09-010"), 65, max(obsw$date), 65, col=goalCol)
 
 #Fat
 ofat <- obsw[!is.na(obsw$fat),c("date", "fat")]
@@ -107,21 +107,24 @@ ovitd <- obsw[!is.na(obsw$vit_D),c("date", "vit_D")]
 Reduce(function(x, y) merge(x, y, all=TRUE), list(ochol, ocrp, ohcy, ovitd))
 
 plot(ochol$date, ochol$tothdlr, main=expression("Cholesterol Total/HDL ratio, <g"), ylim=c(1, 6))
-abline(h=2.5, col=goalCol) #[TRANCEND]
+
+# Optimal level below 2.5 by [TRANCEND]
+abline(h=2.5, col=goalCol) 
+
 ochollm <- lm(ochol$tothdlr~ochol$date)
 abline(ochollm, col=trendCol)
-
-plot(ocrp$date, ocrp$crp, main=expression("CRP, mg/l, <g"), ylim=c(0, 4))
-abline(h=1.3, col=goalCol) #[TRANCEND]
 
 plot(ohcy$date, ohcy$hcy, main=expression(paste("Homocysteine, ", mu, "mol/l, <g")), ylim=c(3, 16))
 abline(h=7.5, col=goalCol) #[TRANCEND]
 
 plot(ovitd$date, ovitd$vit_D, main=expression("Vitamin D, nmol/l, >g"), ylim=c(20, 100))
 abline(h=80, col=goalCol) #[Quattromed]
+
+plot(ocrp$date, ocrp$crp, main=expression("CRP, mg/l, <g"), ylim=c(0, 4))
+abline(h=1.3, col=goalCol) #[TRANCEND]
 ```
 
-TODO! Color coding for optimal and not optimal values
+TODO! Color coding for optimal and not optimal values (to indicate if desired value top or below red line)
 
 ```{r vis, fig.width=7, fig.height=6, echo=F}
 #pdbc

@@ -1,39 +1,35 @@
 #
 # Populate p.db with Fitbit data
 #
-# TODO: real verification of authentication
+# TODO: real verification of being authenticated
 #
-source('pdbauth.R')
+source('../private/pdbauth.R')
 
-library(httr)
+fitbit <- oauth_endpoint(
+  authorize='https://www.fitbit.com/oauth2/authorize',
+  access='https://api.fitbit.com/oauth2/token')
 
-# Fitbit authentication
-epapp <- oauth_app('EPApp', key, secret)
+ep_fit <- oauth_app(appname=fit_app, key=fit_client, secret=fit_secret)
+ep_scope <- c('activity', 'nutrition', 'sleep', 'weight')
 
-token_url <- 'https://api.fitbit.com/oauth/request_token'
-access_url <- 'https://api.fitbit.com/oauth/access_token'
-auth_url <- 'https://www.fitbit.com/oauth/authorize'
-fitbit <- oauth_endpoint(token_url, auth_url, access_url)
-
-fbtoken <- oauth1.0_token(fitbit, epapp)
-sig <- config(token=fbtoken)
+fit_token <- oauth2.0_token(fitbit, ep_fit, scope=ep_scope, use_basic_auth=TRUE)
+sig <- config(token=fit_token)
 
 # Fetch recent days' data
 steps <- NULL
-ndays <- 10
-dateseq <- seq(from=Sys.Date()-ndays, to=Sys.Date()-1, by='day')
-#dateseq <- seq(from=as.Date("2015-08-12"), to=as.Date("2015-08-17"), by='day')
-for (i in 1:ndays) {
+dateseq <- seq(from=Sys.Date()-8, to=Sys.Date()-1, by='day')
+# dateseq <- seq(from=as.Date("2017-01-28"), to=as.Date("2017-03-20"), by='day')
+for (i in seq_along(dateseq)) {
 
     curdate <- dateseq[i]
     print(paste("Processing", curdate))
-
+    
+    # Fetch steps
     fbsurl <- paste0('https://api.fitbit.com/1/user/-/activities/steps/date/', curdate, '/1d/1min.json')
     jsteps <- GET(fbsurl, sig)
         
     totsteps <- as.numeric(content(jsteps)$'activities-steps'[1][[1]]$value)
     if (totsteps > 1000) {
-
         dbGetQuery(conn=pdbc, paste0("INSERT OR REPLACE INTO obs VALUES ('infbstep",
             curdate, "', 'kehaline', '", curdate, "', NULL, 'steps', ", totsteps, ", NULL)"))
         
@@ -44,8 +40,9 @@ for (i in 1:ndays) {
             curst <- content(jsteps)$'activities-steps-intraday'$dataset[j][[1]]$value
             steps <- cbind(steps, c(curdt, curst))
         }
-    }
-    
+    } 
+
+    # Fetch weight
     fbwurl <- paste0('https://api.fitbit.com/1/user/-/body/log/weight/date/', curdate, '.json')
     jweight <- GET(fbwurl, sig)
     
@@ -55,6 +52,7 @@ for (i in 1:ndays) {
             paste(curm[[1]]$date, curm[[1]]$time), "', NULL, 'weight', ", curm[[1]]$weight, ", NULL)"))
     }
 
+    # Fetch fat%
     fbfurl <- paste0('https://api.fitbit.com/1/user/-/body/log/fat/date/', curdate, '.json')
     jfat <- GET(fbfurl, sig)
 
@@ -65,7 +63,8 @@ for (i in 1:ndays) {
     }
 }
 
-#Update infbstep
+
+# Update infbstep
 steps <- t(steps)
 colnames(steps) <- c('dtstamp', 'nsteps')
 steps <- as.data.frame(steps)
