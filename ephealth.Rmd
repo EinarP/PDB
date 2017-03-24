@@ -55,7 +55,7 @@ TODO! add points to highlight drastic weight changes
 
 TODO! add monthly average weight changes line
 
-TODO! Eating?, Sleep
+TODO! Eating, Sleep
 
 TODO! RHR
 
