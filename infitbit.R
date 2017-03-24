@@ -17,7 +17,7 @@ sig <- config(token=fit_token)
 
 # Fetch recent days' data
 steps <- NULL
-dateseq <- seq(from=Sys.Date()-8, to=Sys.Date()-1, by='day')
+dateseq <- seq(from=Sys.Date()-5, to=Sys.Date()-1, by='day')
 # dateseq <- seq(from=as.Date("2017-01-28"), to=as.Date("2017-03-20"), by='day')
 for (i in seq_along(dateseq)) {
 
