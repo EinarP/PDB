@@ -94,6 +94,8 @@ H0: No correlation; HA: Activity level affects sleep
 
 ## Yearly measurements
 
+TODO: According Rhonda Patrick there is optimal range for vitamin D, too much is harmful
+
 ```{r heartpanel, echo=F}
 par(mfrow = c(2, 2))
 

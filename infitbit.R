@@ -10,15 +10,21 @@ fitbit <- oauth_endpoint(
   access='https://api.fitbit.com/oauth2/token')
 
 ep_fit <- oauth_app(appname=fit_app, key=fit_client, secret=fit_secret)
-ep_scope <- c('activity', 'nutrition', 'sleep', 'weight')
 
-fit_token <- oauth2.0_token(fitbit, ep_fit, scope=ep_scope, use_basic_auth=TRUE)
+fit_token <- oauth2.0_token(
+  endpoint =  fitbit,
+  app = ep_fit,
+  scope=c('activity', 'nutrition', 'sleep', 'weight'),
+  use_basic_auth=TRUE
+)
+
 sig <- config(token=fit_token)
 
 # Fetch recent days' data
 steps <- NULL
+
 dateseq <- seq(from=Sys.Date()-5, to=Sys.Date()-1, by='day')
-# dateseq <- seq(from=as.Date("2017-01-28"), to=as.Date("2017-03-20"), by='day')
+# dateseq <- seq(from=as.Date("2017-04-17"), to=as.Date("2017-08-16"), by='day')
 for (i in seq_along(dateseq)) {
 
     curdate <- dateseq[i]
