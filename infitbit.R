@@ -1,30 +1,15 @@
-#
+# ------------------------------------------------------------------------------
 # Populate p.db with Fitbit data
-#
-# TODO: real verification of being authenticated
-#
+# ------------------------------------------------------------------------------
+
 source('../private/pdbauth.R')
-
-fitbit <- oauth_endpoint(
-  authorize='https://www.fitbit.com/oauth2/authorize',
-  access='https://api.fitbit.com/oauth2/token')
-
-ep_fit <- oauth_app(appname=fit_app, key=fit_client, secret=fit_secret)
-
-fit_token <- oauth2.0_token(
-  endpoint =  fitbit,
-  app = ep_fit,
-  scope=c('activity', 'nutrition', 'sleep', 'weight'),
-  use_basic_auth=TRUE
-)
-
-sig <- config(token=fit_token)
+fbt <- getTokenFit()
 
 # Fetch recent days' data
 steps <- NULL
 
-dateseq <- seq(from=Sys.Date()-5, to=Sys.Date()-1, by='day')
-# dateseq <- seq(from=as.Date("2017-04-17"), to=as.Date("2017-08-16"), by='day')
+dateseq <- seq(from = Sys.Date() - 5, to = Sys.Date() - 1, by = 'day')
+# dateseq <- seq(from = as.Date("2017-12-21"), to=as.Date("2018-01-20"), by='day')
 for (i in seq_along(dateseq)) {
 
     curdate <- dateseq[i]
@@ -32,7 +17,7 @@ for (i in seq_along(dateseq)) {
     
     # Fetch steps
     fbsurl <- paste0('https://api.fitbit.com/1/user/-/activities/steps/date/', curdate, '/1d/1min.json')
-    jsteps <- GET(fbsurl, sig)
+    jsteps <- GET(fbsurl, fbt)
         
     totsteps <- as.numeric(content(jsteps)$'activities-steps'[1][[1]]$value)
     if (totsteps > 1000) {
@@ -50,7 +35,7 @@ for (i in seq_along(dateseq)) {
 
     # Fetch weight
     fbwurl <- paste0('https://api.fitbit.com/1/user/-/body/log/weight/date/', curdate, '.json')
-    jweight <- GET(fbwurl, sig)
+    jweight <- GET(fbwurl, fbt)
     
     curm <- content(jweight)$weight
     if (length(curm) > 0) {
@@ -60,7 +45,7 @@ for (i in seq_along(dateseq)) {
 
     # Fetch fat%
     fbfurl <- paste0('https://api.fitbit.com/1/user/-/body/log/fat/date/', curdate, '.json')
-    jfat <- GET(fbfurl, sig)
+    jfat <- GET(fbfurl, fbt)
 
     curm <- content(jfat)$fat
     if (length(curm) > 0) {

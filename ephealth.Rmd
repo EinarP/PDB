@@ -1,6 +1,9 @@
 EPhealth
 ========================================================
 Assumption: lifestyle affects health
+
+TODO: LM not best for fat%, but could be useful for correlation with weight
+
 ```{r dbcon, echo=FALSE, cache=F}
 
 enLocale <- Sys.setlocale("LC_TIME", "English")
@@ -29,7 +32,7 @@ obsw <- merge(obsw, obslchar, by.x = "date", by.y = "date", all = TRUE)
 ## Daily measurements
 
 ```{r fig.width=12, echo=F, fig.height=7}
-print(tail(obsw[, c("date", "weight", "fat", "steps")], 8), row.names=FALSE)
+print(tail(obsw[ ,c('date', 'weight', 'fat', 'steps')]), row.names = FALSE)
 
 #Weight
 plot(obsw$date, obsw$weight, type="l", main="Weight", ylim=c(64, 86))
@@ -45,10 +48,11 @@ abline(ofatlm, col=trendCol)
 
 #Steps
 osteps <- obsw[!is.na(obsw$steps), c("date", "steps")]
-ostepslm <- lm(osteps$steps~osteps$date)
+# ostepslm <- lm(osteps$steps~osteps$date)
 plot(osteps$date, osteps$steps, type="h", main="Steps")
 abline(h=10000, col=goalCol)
-abline(ostepslm, col=trendCol)
+abline(h=20000, col = 'blue')
+abline(h=30000, col = 'lightblue')
 ```
 
 TODO! add points to highlight drastic weight changes
