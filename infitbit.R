@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 # Populate p.db with Fitbit data
 # ------------------------------------------------------------------------------
-source('../private/pdbauth.R')
+source('../../private/pdbauth.R')
 fbt <- getTokenFit()
 
 # Fetch recent days' data
@@ -56,24 +56,25 @@ for (i in seq_along(dateseq)) {
     # Fetch exercise
     url <- paste0(fb_base, 'activities/list.json?afterDate=', cur_date, '&offset=0&limit=1&sort=asc')
     resp <- content(GET(url, fbt))
-    
-    a <- resp$activities[[1]]
-    if (as.Date(a$startTime) == cur_date) {
-      if (a$activityName %in% c('Walk', 'Run')) {
-        
-        ins <- 'INSERT OR REPLACE INTO obs2 (id, object, property, value) VALUES ('
-        
-        id <- paste0("'", paste(a$activityName, a$startTime, sep = '_'), "'")
-        object <- paste0("'", tolower(a$activityName), "'")
-        
-        vals <- paste(id, object, "'start_time'", paste0("'", a$startTime, "'"), sep = ', ')
-        dbGetQuery(conn = pdbc, paste0(ins, vals, ')'))
-        
-        vals <- paste(id, object, "'distance'", paste0("'", a$distance, "'"), sep = ', ')
-        dbGetQuery(conn = pdbc, paste0(ins, vals, ')'))
-        
-        vals <- paste(id, object, "'speed'", paste0("'", a$speed, "'"), sep = ', ')
-        dbGetQuery(conn = pdbc, paste0(ins, vals, ')'))
+    if (length(resp$activities > 0)) {
+      a <- resp$activities[[1]]
+      if (as.Date(a$startTime) == cur_date) {
+        if (a$activityName %in% c('Walk', 'Run')) {
+          
+          ins <- 'INSERT OR REPLACE INTO obs2 (id, object, property, value) VALUES ('
+          
+          id <- paste0("'", paste(a$activityName, a$startTime, sep = '_'), "'")
+          object <- paste0("'", tolower(a$activityName), "'")
+          
+          vals <- paste(id, object, "'start_time'", paste0("'", a$startTime, "'"), sep = ', ')
+          dbGetQuery(conn = pdbc, paste0(ins, vals, ')'))
+          
+          vals <- paste(id, object, "'distance'", paste0("'", a$distance, "'"), sep = ', ')
+          dbGetQuery(conn = pdbc, paste0(ins, vals, ')'))
+          
+          vals <- paste(id, object, "'speed'", paste0("'", a$speed, "'"), sep = ', ')
+          dbGetQuery(conn = pdbc, paste0(ins, vals, ')'))
+        }
       }
     }
 }
