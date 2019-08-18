@@ -56,7 +56,7 @@ for (i in seq_along(dateseq)) {
     # Fetch exercise
     url <- paste0(fb_base, 'activities/list.json?afterDate=', cur_date, '&offset=0&limit=1&sort=asc')
     resp <- content(GET(url, fbt))
-    if (length(resp$activities > 0)) {
+    if (length(resp$activities) > 0) {
       a <- resp$activities[[1]]
       if (as.Date(a$startTime) == cur_date) {
         if (a$activityName %in% c('Walk', 'Run')) {
