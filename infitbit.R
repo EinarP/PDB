@@ -5,11 +5,7 @@ source('../../private/pdbauth.R')
 fbt <- getTokenFit()
 
 # Insert observations into obs table
-<<<<<<< HEAD
 insc_base <- 'INSERT OR REPLACE INTO obs (id, object, property, value, checkpoint, source) VALUES ('
-=======
-insc_base <- 'INSERT OR REPLACE INTO obs2 (id, object, property, value, checkpoint, source) VALUES ('
->>>>>>> f4a080d7cc14dc97de740576152b9371b4aafc9c
 
 # Fetch recent days' data
 steps <- NULL
