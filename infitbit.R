@@ -12,7 +12,7 @@ steps <- NULL
 fb_base <- 'https://api.fitbit.com/1/user/-/'
 
 dateseq <- seq(from = Sys.Date() - 5, to = Sys.Date() - 1, by = 'day')
-# dateseq <- seq(from = as.Date("2018-04-05"), to=as.Date("2018-04-06"), by='day')
+#dateseq <- seq(from = as.Date("2020-01-29"), to=as.Date("2020-01-29"), by='day')
 for (i in seq_along(dateseq)) {
 
   cur_date <- dateseq[i]
@@ -71,21 +71,23 @@ for (i in seq_along(dateseq)) {
   if (length(resp$activities) > 0) {
     a <- resp$activities[[1]]
     if (as.Date(a$startTime) == cur_date) {
-      if (a$activityName %in% c('Walk', 'Run') & a$distance != "") {
+      if (a$activityName %in% c('Walk', 'Run')) {
+        if (a$distance != "") {
           
-        id <- paste("'", paste(a$activityName, a$startTime, sep = '_'), "'")
-        object <- paste0("'", tolower(a$activityName), "'")
-        ckpt <- paste0("'", a$startTime, "'")
-        source <- paste0("'", url, "'")
+          id <- paste("'", paste(a$activityName, a$startTime, sep = '_'), "'")
+          object <- paste0("'", tolower(a$activityName), "'")
+          ckpt <- paste0("'", a$startTime, "'")
+          source <- paste0("'", url, "'")
           
-        vals <- paste(id, object, "'start_time'", ckpt, ckpt, source, sep = ', ')
-        dbGetQuery(conn = pdbc, paste0(insc_base, vals, ')'))
+          vals <- paste(id, object, "'start_time'", ckpt, ckpt, source, sep = ', ')
+          dbGetQuery(conn = pdbc, paste0(insc_base, vals, ')'))
           
-        vals <- paste(id, object, "'distance'", paste0("'", a$distance, "'"), ckpt, source, sep = ', ')
-        dbGetQuery(conn = pdbc, paste0(insc_base, vals, ')'))
+          vals <- paste(id, object, "'distance'", paste0("'", a$distance, "'"), ckpt, source, sep = ', ')
+          dbGetQuery(conn = pdbc, paste0(insc_base, vals, ')'))
           
-        vals <- paste(id, object, "'speed'", paste0("'", a$speed, "'"), ckpt, source, sep = ', ')
-        dbGetQuery(conn = pdbc, paste0(insc_base, vals, ')'))
+          vals <- paste(id, object, "'speed'", paste0("'", a$speed, "'"), ckpt, source, sep = ', ')
+          dbGetQuery(conn = pdbc, paste0(insc_base, vals, ')'))
+        }
       }
     }
   }
