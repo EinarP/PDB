@@ -1,9 +1,12 @@
 # ------------------------------------------------------------------------------
 # Populate p.db with Fitbit data
+# 
+# TODO: Get rid of warnings (SQL statements must be issued with dbExecute() 
+#     or dbSendStatement() instead of dbGetQuery() or dbSendQuery()
 # ------------------------------------------------------------------------------
 source('../../private/pdbauth.R')
 fbt <- getTokenFit()
-
+ 
 # Insert observations into obs table
 insc_base <- 'INSERT OR REPLACE INTO obs (id, object, property, value, checkpoint, source) VALUES ('
 
@@ -73,20 +76,21 @@ for (i in seq_along(dateseq)) {
     if (as.Date(a$startTime) == cur_date) {
       if (a$activityName %in% c('Walk', 'Run')) {
         if (a$distance != "") {
-          
-          id <- paste("'", paste(a$activityName, a$startTime, sep = '_'), "'")
-          object <- paste0("'", tolower(a$activityName), "'")
-          ckpt <- paste0("'", a$startTime, "'")
-          source <- paste0("'", url, "'")
-          
-          vals <- paste(id, object, "'start_time'", ckpt, ckpt, source, sep = ', ')
-          dbGetQuery(conn = pdbc, paste0(insc_base, vals, ')'))
-          
-          vals <- paste(id, object, "'distance'", paste0("'", a$distance, "'"), ckpt, source, sep = ', ')
-          dbGetQuery(conn = pdbc, paste0(insc_base, vals, ')'))
-          
-          vals <- paste(id, object, "'speed'", paste0("'", a$speed, "'"), ckpt, source, sep = ', ')
-          dbGetQuery(conn = pdbc, paste0(insc_base, vals, ')'))
+       
+          object <- tolower(a$activityName)
+          ckpt <- a$startTime
+
+          id <- paste(object, "start_time", a$startTime, sep = '_')
+          vals <- paste(id, object, "start_time", a$startTime, ckpt, url, sep = "', '") 
+          dbGetQuery(conn = pdbc, paste0(insc_base, "'", vals, "')"))
+  
+          id <- paste(object, "distance", a$startTime, sep = '_')
+          vals <- paste(id, object, "distance", a$distance, ckpt, url, sep = "', '")
+          dbGetQuery(conn = pdbc, paste0(insc_base, "'", vals, "')"))
+  
+          id <- paste(object, "speed", a$startTime, sep = '_')
+          vals <- paste(id, object, "speed", a$speed, ckpt, url, sep = "', '")
+          dbGetQuery(conn = pdbc, paste0(insc_base, "'", vals, "')"))
         }
       }
     }
